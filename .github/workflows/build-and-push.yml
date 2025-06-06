@@ -1,0 +1,53 @@
+# Give your workflow a name
+name: Build and Push Docker Image
+
+# This section defines when the workflow should run
+on:
+  # Run it on pushes to the 'main' branch
+  push:
+    branches: [ "main" ]
+  # Also allow running it manually from the Actions tab on GitHub
+  workflow_dispatch:
+
+# This section defines the jobs to be run. We have one job called 'build'.
+jobs:
+  build:
+    # The type of machine to run the job on. 'ubuntu-latest' is a standard choice.
+    runs-on: ubuntu-latest
+
+    # This section sets permissions for the job. 
+    # We need to give it permission to write to packages to push the Docker image.
+    permissions:
+      contents: read
+      packages: write
+
+    # These are the steps the job will perform in order
+    steps:
+      # Step 1: Check out your code from the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: NEW - Create a lowercase version of the owner's name (your username)
+      # This is the correct way to handle usernames with uppercase letters.
+      - name: Set owner name to lowercase
+        run: |
+          echo "IMAGE_OWNER_LC=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      # Step 3: Log in to the GitHub Container Registry
+      - name: Log in to the Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 4: Build and push the Docker image with the correct lowercase name
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          # This now uses the lowercase owner name we created in Step 2.
+          tags: |
+            ghcr.io/${{ env.IMAGE_OWNER_LC }}/devops-assessment-test:latest
+            ghcr.io/${{ env.IMAGE_OWNER_LC }}/devops-assessment-test:${{ github.sha }}

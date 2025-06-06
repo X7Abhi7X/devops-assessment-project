@@ -1,0 +1,29 @@
+# This specifies the API version for the Deployment object
+apiVersion: apps/v1
+# This specifies the kind of object we are creating
+kind: Deployment
+metadata:
+  # The name of our deployment
+  name: quote-app-deployment
+spec:
+  # We want 2 instances (pods) of our application running for high availability
+  replicas: 2
+  selector:
+    # This selector helps the Deployment find which pods to manage
+    matchLabels:
+      app: quote-app
+  template:
+    metadata:
+      # The pods created will have this label
+      labels:
+        app: quote-app
+    spec:
+      containers:
+      # Here we define the container to run
+      - name: quote-app-container
+        # This is the Docker image to use.
+        # IMPORTANT: You must replace YOUR_USERNAME with your GitHub username.
+        image: ghcr.io/YOUR_USERNAME/devops-assessment-project/quote-scraper-app:latest
+        ports:
+        # The port inside the container that the application uses
+        - containerPort: 5000

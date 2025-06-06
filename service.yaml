@@ -1,0 +1,20 @@
+# This specifies the API version for the Service object
+apiVersion: v1
+# This specifies the kind of object we are creating
+kind: Service
+metadata:
+  # The name of our service
+  name: quote-app-service
+spec:
+  # A LoadBalancer service is the standard way to expose an application to the internet
+  type: LoadBalancer
+  selector:
+    # This selector tells the Service to send traffic to any pod with the 'app: quote-app' label.
+    # This connects the Service to our Deployment.
+    app: quote-app
+  ports:
+  - protocol: TCP
+    # The port on the Load Balancer that will be exposed to the outside world
+    port: 80
+    # The port inside the pods to forward the traffic to
+    targetPort: 5000
